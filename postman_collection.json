@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "Tamteen API",
+    "description": "Complete API collection for Tamteen - CV Builder with ATS Analysis",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cv_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Send OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Success is true', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "2. Verify OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data.token) {",
+                  "  pm.collectionVariables.set('token', body.data.token);",
+                  "  console.log('Token saved:', body.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "3. Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CVs",
+      "item": [
+        {
+          "name": "1. List All CVs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs",
+              "host": ["{{base_url}}"],
+              "path": ["cvs"]
+            }
+          }
+        },
+        {
+          "name": "2. Create CV",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data.cv) {",
+                  "  pm.collectionVariables.set('cv_id', body.data.cv.id);",
+                  "  console.log('CV ID saved:', body.data.cv.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Software Engineer CV\",\n  \"full_name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1-555-0123\",\n  \"summary\": \"Experienced software engineer with 7+ years developing scalable web applications. Led cross-functional teams and delivered solutions that improved performance by 40%. Strong background in JavaScript, Python, and cloud architecture using AWS.\",\n  \"experience\": [\n    {\n      \"title\": \"Senior Software Engineer\",\n      \"company\": \"TechCorp Inc.\",\n      \"start_date\": \"2020-01\",\n      \"end_date\": \"Present\",\n      \"description\": [\n        \"Developed and optimized microservices architecture using Node.js and Docker, reducing latency by 35%\",\n        \"Led a team of 5 engineers, mentored junior developers and improved team velocity by 25%\",\n        \"Implemented CI/CD pipelines using GitHub Actions, reducing deployment time from 2 hours to 15 minutes\",\n        \"Built RESTful APIs consumed by 50,000+ daily active users\"\n      ]\n    },\n    {\n      \"title\": \"Software Engineer\",\n      \"company\": \"StartupXYZ\",\n      \"start_date\": \"2017-06\",\n      \"end_date\": \"2019-12\",\n      \"description\": [\n        \"Designed and developed React frontend applications with TypeScript\",\n        \"Collaborated with product team to launch 3 major features increasing user retention by 20%\",\n        \"Analyzed system performance and optimized SQL queries, reducing database load by 30%\"\n      ]\n    }\n  ],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science in Computer Science\",\n      \"institution\": \"University of Technology\",\n      \"year\": \"2017\",\n      \"field\": \"Computer Science\"\n    }\n  ],\n  \"skills\": [\n    \"JavaScript\", \"TypeScript\", \"Python\", \"React\", \"Node.js\",\n    \"AWS\", \"Docker\", \"Kubernetes\", \"PostgreSQL\", \"MongoDB\",\n    \"Git\", \"CI/CD\", \"REST API\", \"GraphQL\", \"Agile\", \"Scrum\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cvs",
+              "host": ["{{base_url}}"],
+              "path": ["cvs"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Single CV",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs/{{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cvs", "{{cv_id}}"]
+            }
+          }
+        },
+        {
+          "name": "4. Update CV",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lead Software Engineer CV (Updated)\",\n  \"summary\": \"Passionate software engineer with 8+ years of experience. Spearheaded development of cloud-native applications achieving 99.9% uptime. Expert in microservices, DevOps practices, and leading high-performance engineering teams. Reduced infrastructure costs by $200K annually through cloud optimization.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cvs/{{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cvs", "{{cv_id}}"]
+            }
+          }
+        },
+        {
+          "name": "5. Delete CV",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs/{{cv_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cvs", "{{cv_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ATS Analysis",
+      "item": [
+        {
+          "name": "1. Analyze CV (ATS Score)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs/{{cv_id}}/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["cvs", "{{cv_id}}", "analyze"]
+            }
+          }
+        },
+        {
+          "name": "2. Get Analysis History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs/{{cv_id}}/analyses",
+              "host": ["{{base_url}}"],
+              "path": ["cvs", "{{cv_id}}", "analyses"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "Send OTP - Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP - Wrong Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"000000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Access Protected Route Without Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cvs",
+              "host": ["{{base_url}}"],
+              "path": ["cvs"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
